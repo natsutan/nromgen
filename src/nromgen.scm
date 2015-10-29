@@ -23,27 +23,31 @@
         x
         (* (power x (- n 1)) x))))
 
+(define quantize
+  (lambda (x)
+    (if (< x 0)
+        (- x 1.0)
+        x)))
+
 (define toFix
   (lambda (x W I)
-    (let ((val (* x (power 2 (- W I)))))
+    (let ((val (* x (power 2 (- W I 1))))
+          (max (- (power 2 (- W 1)) 1))
+          (min (- (power 2 (- W 1)))))
       (let ((val_int (values-ref (modf val) 1)))
-        (if (< val_int 0)
-            (- val_int 1.0)
-            val_int)))))
-
-
-(modf 0.0)
+        (clamp (quantize val_int) min max)))))
 
 (define make-data
   (lambda (func min max adrw W I)
     (let* ((num (power 2 adrw))
-          (data (make-vector num)))
-      (dotimes
-       (x num)
+	   (data (make-vector num))
+	   (unit (/ (- max min) num))
+	   )
+      (dotimes(x num)
        (vector-set!
         data
         x
-        (toFix (func x) W I)))
+        (toFix (func (+ (* x unit) min)) W I)))
       (print data)
       data)))
 
