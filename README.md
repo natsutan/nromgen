@@ -1,27 +1,27 @@
 # nromgen(Nagato ROM generator)
-���w�֐��̐��l��������ROM��H�𐶐����܂��B�o�̓t�@�C����Verilog�A�t�H�[�}�b�g�͌Œ菬���_�ł��B���͈͂̔͂�Œ菬���_���̃r�b�g����ς��āA�ȒP��Verilog�t�@�C�����X�V�ł��܂��B
+数学関数の数値が入ったROM回路を生成します。出力ファイルはVerilog、フォーマットは固定小数点です。入力の範囲や固定小数点数のビット幅を変えて、簡単にVerilogファイルを作成できます。
 
-# �����
-nromgen�𓮍삳����ɂ�Gauche���K�v�ł��Bformat���g���Ă���̂ŁA����scheme�����n�ł͓����܂���B�������ꂽVerilog�ƃe�X�g�x���`�𓮍삳����ɂ�Verilog�̃V�~�����[�^���K�v�ł��B�T���v���Ƃ���veritak�ł̃v���W�F�N�g�t�@�C����p�ӂ��Ă��܂��B
+# 動作環境
+nromgenを動作させるにはGaucheが必要です。formatを使っているので、他のscheme処理系では動きません。生成されたVerilogとテストベンチを動作させるにはVerilogのシミュレータが必要です。サンプルとしてveritakでのプロジェクトファイルを用意しています。
 
-����m�F�ɂ͈ȉ��̃o�[�W�������g�p���܂����B
+動作確認には以下のバージョンを使用しました。
 - Gauche:Gauche scheme shell, version 0.9.4 [utf-8,wthreads], i686-pc-mingw32
 - Veritak:3.84D
 
-# �g����
-gosh�ւ̃p�X���ʂ��Ă����ԂŁA�ȉ��̃R�}���h�����s���Ă��������B
+# 使い方
+goshへのパスが通っている状態で、以下のコマンドを実行してください。
 ```
-$ gosh nromgen.scm �ݒ�t�@�C��
+$ gosh nromgen.scm 設定ファイル
 ```
-�T���v���𓮂����ꍇ�́Asrc�f�B���N�g���[�ֈړ����A�ȉ��̃R�}���h�����s���Ă��������B
+サンプルを動かす場合は、srcディレクトリーへ移動し、以下のコマンドを実行してください。
 ```
 $ gosh nromgen.scm ../sample/sinrom.scm
 ```
-output�f�B���N�g���[�ȉ��ɁARTL�A�e�X�g�x���`�A�e���v���[�g����������܂��B
+outputディレクトリー以下に、RTL、テストベンチ、テンプレートが生成されます。
 
 
-# �ݒ�t�@�C���t�H�[�}�b�g
-ROM�̐����ɕK�v�Ȓl��ݒ肵�Ă��������B
+# 設定ファイルフォーマット
+ROMの生成に必要な値を設定してください。
 
 ```scheme
 ; sample file
@@ -38,35 +38,36 @@ ROM�̐����ɕK�v�Ȓl��ݒ肵�Ă��������B
 (define *nr-template-output-dir* "../output/template")
 
 ```
-���ꂼ��̕ϐ��̈Ӗ��ł��B
-� \*nr-func\* ��肽���֐����w�肵�Ă��܂��BGauche���T�|�[�g���Ă���֐��ł���΂��̂܂܎w��ł��܂��B�Ɏ����g���܂��B�i��q�j
-- \*nr-min\* �f�[�^�̍ŏ��l���w�肵�܂��B
-- \*nr-max\* �f�[�^�̍ő�l���w�肵�܂��B
-- \*nr-adr-width\* ROM�̃A�h���X�̃r�b�g�����w�肵�܂��B
-- \*nr-W\* �o�̓f�[�^�i�Œ菬���_���j�̃r�b�g�����w�肵�܂��BSystemC��sc_fixed�̃p�����[�^W�Ɠ����ł��B�ʎq���̃A���S���Y���́A
-- \*nr-I\* �o�̓f�[�^�i�Œ菬���_���j�̐��������̃r�b�g�����w�肵�܂��BSystemC��sc_fixed�̃p�����[�^I�Ɠ����ł����A��ɕ����r�b�g��1bit���m�ۂ��܂��B�I�[�o�[�t���[�����������ꍇ�́A�ő�l�A�ŏ��l�ŖO�a���܂��B
-- \*nr-module-name\* Verilog�̃��W���[�������w�肵�܂��B�B
-- \*nr-rtl-output-dir\* RTL�t�@�C���̏o�͐���w�肵�܂��B
-\*nr-testbench-output-dir\* �e�X�g�x���`�̏o�͐���w�肵�܂��B
-\*nr-template-output-dir\* �e���v���[�g�̏o�͐���w�肵�܂��B
+それぞれの変数の意味です。
 
-\*nr-func\*�̓Ɏ����g�p���āA�C�ӂ̐������L�q�ł��܂��B������1���A������Ԃ��Ɏ����L�q���Ă��������B���̓f�[�^���悷��ROM����肽���ꍇ�͂��̂悤�Ɏw�肵�܂��B
+ｰ \*nr-func\* 作りたい関数を指定してします。Gaucheがサポートしている関数であればそのまま指定できます。λ式も使えます。（後述）
+- \*nr-min\* データの最小値を指定します。
+- \*nr-max\* データの最大値を指定します。
+- \*nr-adr-width\* ROMのアドレスのビット幅を指定します。
+- \*nr-W\* 出力データ（固定小数点数）のビット幅を指定します。SystemCのsc_fixedのパラメータWと同じです。量子化のアルゴリズムは、
+- \*nr-I\* 出力データ（固定小数点数）の整数部分のビット幅を指定します。SystemCのsc_fixedのパラメータIと同じですが、常に符号ビットを1bit分確保します。オーバーフローが発生した場合は、最大値、最小値で飽和します。
+- \*nr-module-name\* Verilogのモジュール名を指定します。。
+- \*nr-rtl-output-dir\* RTLファイルの出力先を指定します。
+\*nr-testbench-output-dir\* テストベンチの出力先を指定します。
+\*nr-template-output-dir\* テンプレートの出力先を指定します。
+
+\*nr-func\*はλ式を使用して、任意の数式を記述できます。引数を1つ取り、実数を返すλ式を記述してください。入力データを二乗するROMを作りたい場合はこのように指定します。
 
 ```scheme
 (define *nr-func* (lambda (x) (* x x)))
 ```
 
-# �o�̓t�@�C��
-�o�̓t�@�C���́ARTL�A�e�X�g�x���`�A�e���v���[�g��3�ł��B�t�H�[�}�b�g�͑S��Verilog�ł��B���ꂼ��ݒ�t�@�C���Ŏw�肵���f�B���N�g���ɐ�������܂��B
+# 出力ファイル
+出力ファイルは、RTL、テストベンチ、テンプレートの3つです。フォーマットは全てVerilogです。それぞれ設定ファイルで指定したディレクトリに生成されます。
 
-## RTL
-ROM��RTL�L�q�ł��B
+### RTL
+ROMのRTL記述です。
 
-## �e�X�g�x���`
-��������ROM��Sim���邽�߂̃e�X�g�x���`�ł��B
+### テストベンチ
+生成したROMをSimするためのテストベンチです。
 
-## �e���v���[�g
-Verilog�ŃC���X�^���X������Ƃ��Ɏg���e���v���[�g�ł��B
+### テンプレート
+Verilogでインスタンス化するときに使うテンプレートです。
 ```verilog
 	sinrom sinrom (
 		.CLK(),
@@ -77,32 +78,32 @@ Verilog�ŃC���X�^���X������Ƃ��Ɏg���e���v���[�g�ł��B
 
 ```
 
-# sim����
-veritak�ł�Sim���ʂł��B
-## sin�֐�
+# sim結果
+veritakでのSim結果です。
+### sin関数
 
 ```scheme
 (define *nr-func* sin)
 ```
-[sin]: https://github.com/natsutan/nromgen/img/sin.png
+![sin](https://github.com/natsutan/nromgen/blob/master/img/sin.png)
+左端はリセット期間です。
 
-## tanh�֐�
+### tanh関数
 ```scheme
 (define *nr-func* tanh)
 ```
-[tanh]: https://github.com/natsutan/nromgen/img/tanh.png
+![tanh](https://github.com/natsutan/nromgen/blob/master/img/tanh.png)
 
-
-## y=x^2
+### y=x^2
 ```scheme
 (define *nr-func* (lambda (x) (* x x)))
 ```
-[parabora]: https://github.com/natsutan/nromgen/img/poarabo.png
-
+![parabora](https://github.com/natsutan/nromgen/blob/master/img/parabo.png)
+指定のビット幅でオーバーフローが発生するときは、最大値で飽和します。
 
 # TODO
-- �N�����̃G���[�����AUsage�̕\��
-- RTL�̃f�[�^�L�q�����ɁA�R�����g�Ƃ��ĕ��������_�������߂����l��ǉ�
-- Verilog���������͒��ۓx��2���炢�グ����
+- 起動時のエラー処理、Usageの表示
+- RTLのデータ記述部分に、コメントとして浮動小数点数を解釈した値を追加
+- Verilog生成部分は抽象度を2つくらい上げたい
 
 
