@@ -80,7 +80,8 @@
 
 (define romdata->string
   (lambda (data dataw)
-    (number->string (logand #xffffffff #?=data) dataw)))
+    (let ((format (- (power 2 dataw) 1)))
+      (number->string (logand format data) 16))))
 
 (define make-rtl
   (lambda (dir name data adrw dataw)
@@ -91,16 +92,16 @@
       (format fp "\tinput CLK,~%")
       (format fp "\tinput RESET_X,~%")
       (format fp "\tinput \[~A:0\] ADR,~%" (- adrw 1))
-      (format fp "\toutput reg \[~A:0\] DATA,~%" (- dataw 1))
+      (format fp "\toutput reg \[~A:0\] DATA~%" (- dataw 1))
       (format fp "\t);~%")
-      (format fp "\talwasy @(posedge CLK or negedge RESET_X)begin~%")
+      (format fp "\talways @(posedge CLK or negedge RESET_X)begin~%")
       (format fp "\t\tif(RESET_X == 1'b0)begin~%")
-      (format fp "\t\t\tDATA <= ~Ad0;~%" dataw)
+      (format fp "\t\t\tDATA <= ~A'd0;~%" dataw)
       (format fp "\t\tend else begin~%")
       (format fp "\t\t\tcase(ADR)~%")
       (dotimes (x (power 2 adrw))
-               (format fp "\t\t\t~A:DATA <= ~Ad'~A;~%"
-                       x dataw (vector-ref data x)))
+               (format fp "\t\t\t~A:DATA <= ~A'h~A;~%"
+                       x dataw (romdata->string (vector-ref data x) dataw)))
       (format fp "\t\t\tendcase~%")
       (format fp "\t\tend~%")
       (format fp "\tend~%")
@@ -127,28 +128,29 @@
         ; clk
         (format fp "\tparameter PERIOD = 10.0;~%")
         (format fp "\talways # (PERIOD/2) CLK = ~~CLK;~%")
-        (format fp "\tinitial beign #1 CLK = 0;end~%")
+        (format fp "\tinitial begin CLK = 1;end~%")
         (format fp "~%")
         ; instance
         (format fp "\t~A U0 (~%" name)
-        (format fp "\t\t.CLK(CLK)~%")
-        (format fp "\t\t.RESET_X(RESET_X)~%")
-        (format fp "\t\t.ADR(ADR)~%")
+        (format fp "\t\t.CLK(CLK),~%")
+        (format fp "\t\t.RESET_X(RESET_X),~%")
+        (format fp "\t\t.ADR(ADR),~%")
         (format fp "\t\t.DATA(DATA)~%")
         (format fp "\t);~%")
         (format fp "~%")
         ; tb
         (format fp "\tinitial begin~%")
-        (format fp "\ti=fopen(\"dump.txt\")~%")
-        (format fp "\t\tRESET_X = 1; ADR = 0;~%")
+        (format fp "\t\ti=$fopen(\"dump.txt\");~%")
+        (format fp "\t\t#1 RESET_X = 1; ADR = 0;~%")
         (format fp "\t\t# (PERIOD * 3)  RESET_X = 0;~%") 
         (format fp "\t\t# (PERIOD * 5)  RESET_X = 1;~%") 
 
         (format fp "\t\tfor(i=0;i<~A;i=i+1)begin~%" (power 2 adrw)) 
         (format fp "\t\t\tADR = i;~%")
-        (format fp "\t\t\t# (PERIOD) fwrite(\"%d\\n\", DATA);~%")            
+        (format fp "\t\t\t# (PERIOD) $fwrite(i, \"%X\\n\", DATA);~%")            
         (format fp "\t\tend~%")  
-        (format fp "\t\t# (PERIOD * 10)  finish();~%") 
+        (format fp "\t\t# (PERIOD)  $finish();~%")
+	(format fp "\tend~%")  
         (format fp "endmodule~%")
         (close-verilog-file fp)))))
 
@@ -162,9 +164,9 @@
       (make-header fp fname)
       (format fp "~%")
       (format fp "\t~A ~A (~%" name name)
-      (format fp "\t\t.CLK()~%")
-      (format fp "\t\t.RESET_X()~%")
-      (format fp "\t\t.ADR()~%")
+      (format fp "\t\t.CLK(),~%")
+      (format fp "\t\t.RESET_X(),~%")
+      (format fp "\t\t.ADR(),~%")
       (format fp "\t\t.DATA()~%")
       (format fp "\t);~%")
       (close-verilog-file fp)))))
@@ -197,3 +199,5 @@
        *nr-W*)
       (make-template *nr-template-output-dir* *nr-module-name*)))
   0)
+
+
