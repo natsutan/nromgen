@@ -62,9 +62,11 @@ ROMの生成に必要な値を設定してください。
 
 ### RTL
 ROMのRTL記述です。
+[sinrom.v](https://github.com/natsutan/nromgen/blob/master/output/rtl/sinrom.v "sinrom.v")
 
 ### テストベンチ
 生成したROMをSimするためのテストベンチです。
+[sinrom_tb.v](https://github.com/natsutan/nromgen/blob/master/output/tb/sinrom_tb.v "sinrom_tb.v")
 
 ### テンプレート
 Verilogでインスタンス化するときに使うテンプレートです。
