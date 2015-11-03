@@ -1,6 +1,9 @@
 # nromgen(Nagato ROM generator)
 数学関数の数値が入ったROM回路を生成します。出力ファイルはVerilog、フォーマットは固定小数点です。入力の範囲や固定小数点数のビット幅を変えて、簡単にVerilogファイルを作成できます。
 
+# License
+This software is released under the MIT License, see LICENSE.txt.
+
 # 動作環境
 nromgenを動作させるにはGaucheが必要です。formatを使っているので、他のscheme処理系では動きません。生成されたVerilogとテストベンチを動作させるにはVerilogのシミュレータが必要です。サンプルとしてveritakでのプロジェクトファイルを用意しています。
 
