@@ -124,6 +124,7 @@
         (format fp "\treg \[~A:0\] ADR;~%" (- adrw 1))
         (format fp "\twire \[~A:0\] DATA;~%" (- dataw 1))
         (format fp "\tinteger i;~%")
+        (format fp "\tinteger fp;~%")
         (format fp "~%")
         ; clk
         (format fp "\tparameter PERIOD = 10.0;~%")
@@ -140,14 +141,14 @@
         (format fp "~%")
         ; tb
         (format fp "\tinitial begin~%")
-        (format fp "\t\ti=$fopen(\"dump.txt\");~%")
+        (format fp "\t\tfp=$fopen(\"dump.txt\");~%")
         (format fp "\t\t#1 RESET_X = 1; ADR = 0;~%")
         (format fp "\t\t# (PERIOD * 3)  RESET_X = 0;~%") 
         (format fp "\t\t# (PERIOD * 5)  RESET_X = 1;~%") 
 
         (format fp "\t\tfor(i=0;i<~A;i=i+1)begin~%" (power 2 adrw)) 
         (format fp "\t\t\tADR = i;~%")
-        (format fp "\t\t\t# (PERIOD) $fwrite(i, \"%X\\n\", DATA);~%")            
+        (format fp "\t\t\t# (PERIOD) $fwrite(fp, \"%X\\n\", DATA);~%")            
         (format fp "\t\tend~%")  
         (format fp "\t\t# (PERIOD)  $finish();~%")
 	(format fp "\tend~%")  
